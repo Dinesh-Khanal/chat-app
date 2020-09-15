@@ -2,18 +2,22 @@ import React, { useState, useEffect, useRef } from "react";
 import "./ChatBox.css";
 import { images } from "../../projectimages";
 import ReactLoading from "react-loading";
-import { firestore } from "../../services/firebase";
+import { firestore, storage } from "../../services/firebase";
 import { loginStrings } from "../../loginStrings";
 import moment from "moment";
+import Input from "./Input";
 
 const ChatBox = ({ currentPeerUser, showToast }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isShowSticker, setIsShowSticker] = useState(false);
-  const [inputValue, setInputValue] = useState("");
   const [listMessage, setListMessage] = useState([]);
-  const refInput = useRef(null);
+  const [update, forceUpdate] = useState(false);
   const currentUserId = localStorage.getItem(loginStrings.ID);
-  const currentPeerUserMessages = [];
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  });
 
   const hashString = (str) => {
     let hash = 0;
@@ -23,13 +27,13 @@ const ChatBox = ({ currentPeerUser, showToast }) => {
     }
     return hash;
   };
-
   let groupChatId;
   if (hashString(currentUserId) <= hashString(currentPeerUser.id)) {
-    groupChatId = `${currentUserId} -${currentPeerUser.id}`;
+    groupChatId = `${currentUserId}-${currentPeerUser.id}`;
   } else {
     groupChatId = `${currentPeerUser.id}-${currentUserId}`;
   }
+
   useEffect(() => {
     let messageList = [];
     const removeListener = firestore
@@ -53,10 +57,7 @@ const ChatBox = ({ currentPeerUser, showToast }) => {
       removeListener();
     };
   }, [groupChatId, showToast]);
-  // firestore.collection('users').doc(currentPeerUser.documentkey).get()
-  // .then((docRef) =>{
-  //  currentPeerUserMessages = docRef.data().messages
-  // })
+
   const renderSticker = () => {
     return (
       <div className="viewStickers">
@@ -104,10 +105,7 @@ const ChatBox = ({ currentPeerUser, showToast }) => {
     );
   };
   const onSendMessage = (content, type) => {
-    let notificationMessage = [];
-    if (isShowSticker && type === 2) {
-      setIsShowSticker(false);
-    }
+    let notificationMessages = [];
     if (content.trim() === "") {
       return;
     } else {
@@ -126,9 +124,20 @@ const ChatBox = ({ currentPeerUser, showToast }) => {
         .doc(timestamp)
         .set(itemMessage)
         .then(() => {
-          setInputValue("");
+          setIsLoading(false);
+          setIsShowSticker(false);
+          forceUpdate(!update);
         });
     }
+    notificationMessages.push({ notificationId: currentUserId });
+    firestore
+      .collection("users")
+      .doc(currentPeerUser.documentKey)
+      .update({ messages: notificationMessages })
+      .then((data) => {})
+      .catch((err) => {
+        showToast(0, err.toString);
+      });
   };
   // const toggleSticker = () => {
   //   if (isShowSticker) {
@@ -137,14 +146,31 @@ const ChatBox = ({ currentPeerUser, showToast }) => {
   //     setIsShowSticker(true);
   //   }
   // };
-  const onChoosePhoto = () => {
-    //
-  };
-  const onKeyPress = (e) => {
-    if (e.key === "Enter") {
-      onSendMessage(inputValue, 0);
+
+  const uploadPhoto = (photoFile) => {
+    if (photoFile) {
+      const timestamp = moment().valueOf().toString();
+      setIsLoading(true);
+      const uploadTask = storage.ref().child(timestamp).put(photoFile);
+      uploadTask.on(
+        "state_changed",
+        null,
+        (err) => {
+          setIsLoading(false);
+          showToast(0, err.message);
+        },
+        () => {
+          uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+            onSendMessage(downloadURL, 1);
+          });
+        }
+      );
+    } else {
+      setIsLoading(false);
+      showToast(0, "File is null");
     }
   };
+
   const isLastMessageLeft = (index) => {
     if (
       (index + 1 < listMessage.length &&
@@ -154,6 +180,22 @@ const ChatBox = ({ currentPeerUser, showToast }) => {
       return true;
     } else {
       return false;
+    }
+  };
+  const getGifImage = (value) => {
+    switch (value) {
+      case "lego1":
+        return images.lego1;
+      case "lego2":
+        return images.lego2;
+      case "lego3":
+        return images.lego3;
+      case "lego4":
+        return images.lego4;
+      case "lego5":
+        return images.lego5;
+      default:
+        return null;
     }
   };
   const renderListMessage = () => {
@@ -190,9 +232,9 @@ const ChatBox = ({ currentPeerUser, showToast }) => {
               <div className="viewWrapItemLeft" key={index}>
                 {isLastMessageLeft(index) ? (
                   <img
-                    src={currentPeerUser.URL}
+                    src={currentPeerUser.url}
                     alt="avatar"
-                    className="perrAvatarLeft"
+                    className="peerAvatarLeft"
                   />
                 ) : (
                   <div className="viewPaddingLeft"></div>
@@ -211,16 +253,58 @@ const ChatBox = ({ currentPeerUser, showToast }) => {
             );
           } else if (item.type === 1) {
             viewListMessage.push(
-              <div className="viewWrapItemLeft2">
+              <div className="viewWrapItemLeft2" key={index}>
                 {isLastMessageLeft(index) ? (
                   <img
-                    src={currentPeerUser.URL}
+                    src={currentPeerUser.url}
                     alt="avatar"
-                    className="perrAvatarLeft"
+                    className="peerAvatarLeft"
                   />
                 ) : (
                   <div className="viewPaddingLeft"></div>
                 )}
+                <div className="viewItemLeft2">
+                  <img
+                    src={item.content}
+                    alt="Update"
+                    className="imgItemLeft"
+                  />
+                </div>
+                {isLastMessageLeft(index) ? (
+                  <span className="textTimeLeft">
+                    <div className="time">
+                      {moment(Number(item.timestamp)).format("LL")}
+                    </div>
+                  </span>
+                ) : null}
+              </div>
+            );
+          } else {
+            viewListMessage.push(
+              <div className="viewWrapItemLeft2" key={index}>
+                {isLastMessageLeft(index) ? (
+                  <img
+                    src={currentPeerUser.url}
+                    alt="avatar"
+                    className="peerAvatarLeft"
+                  />
+                ) : (
+                  <div className="viewPaddingLeft"></div>
+                )}
+                <div className="viewItemLeft3">
+                  <img
+                    src={getGifImage(item.content)}
+                    alt="Content message"
+                    className="imgItemLeft"
+                  />
+                </div>
+                {isLastMessageLeft(index) ? (
+                  <span className="textTimeLeft">
+                    <div className="time">
+                      {moment(Number(item.timestamp)).format("LL")}
+                    </div>
+                  </span>
+                ) : null}
               </div>
             );
           }
@@ -231,10 +315,6 @@ const ChatBox = ({ currentPeerUser, showToast }) => {
     }
     return viewListMessage;
   };
-  const getGifImage = () => {
-    //
-  };
-
   return (
     <div className="viewChatBoard">
       <div className="headerChatBoard">
@@ -248,47 +328,18 @@ const ChatBox = ({ currentPeerUser, showToast }) => {
           <div className="aboutme">{currentPeerUser.description}</div>
         </div>
       </div>
-      <div className="viewListContentChat">{renderListMessage()}</div>
-      {isShowSticker ? renderSticker() : null}
-      <div className="viewBottom">
-        <img
-          src={images.input_file}
-          alt="input_file"
-          className="icOpenGallery"
-          onClick={() => refInput.current.click()}
-        />
-        <input
-          type="file"
-          ref={refInput}
-          className="viewInputGallery"
-          accept="image/*"
-          onChange={onChoosePhoto}
-        />
-        <img
-          src={images.sticker}
-          alt="icon open sticker"
-          className="icOpenSticker"
-          onClick={() => setIsShowSticker(!isShowSticker)}
-        />
-        <input
-          type="text"
-          className="viewInput"
-          placeholder="Type a message"
-          value={inputValue}
-          onChange={(e) => {
-            setInputValue(e.target.value);
-          }}
-          onKeyPress={onKeyPress}
-        />
-        <img
-          src={images.send}
-          alt="send icon"
-          className="icSend"
-          onClick={() => {
-            onSendMessage(inputValue, 0);
-          }}
-        />
+      <div className="viewListContentChat">
+        {renderListMessage()}
+        <div ref={messagesEndRef} />
       </div>
+      {isShowSticker ? renderSticker() : null}
+      <Input
+        uploadPhoto={uploadPhoto}
+        showToast={showToast}
+        onSendMessage={onSendMessage}
+        isShowSticker={isShowSticker}
+        setIsShowSticker={setIsShowSticker}
+      />
       {isLoading ? (
         <div className="viewLoading">
           <ReactLoading

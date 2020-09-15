@@ -110,10 +110,6 @@
   cursor: pointer;
 }
 .notificationpragraph {
-  right: 0;
-  bottom: 0;
-}
-.newmessages {
   font-size: 8px;
 }
 
@@ -161,7 +157,7 @@
   border: none;
   display: flex;
   flex-direction: row;
-  background-color: #fff;
+  background-color: rgb(231, 230, 230);
   max-width: 50vh;
   min-width: 50vh;
   padding: 10px;
@@ -218,7 +214,7 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  width: 240px;
+  width: 205px;
   text-align: left;
   font-size: 14px;
 }

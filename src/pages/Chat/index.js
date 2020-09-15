@@ -35,7 +35,6 @@ const Chat = ({ showToast }) => {
         doc.data().messages.forEach((item) => {
           currentUserMessages.push({
             notificationId: item.notificationId,
-            number: item.number,
           });
         });
         setDisplayedContactSwitchedNotification(currentUserMessages);
@@ -69,16 +68,18 @@ const Chat = ({ showToast }) => {
   };
 
   const notificationErase = (itemId) => {
-    setDisplayedContactSwitchedNotification.forEach((el) => {
+    let messageErageList = [];
+    displayedContactSwitchedNotification.forEach((el) => {
       if (el.notificationId.length > 0) {
         if (el.notificationId !== itemId) {
-          notificationMessagesErase.push({
+          messageErageList.push({
             notificationId: el.notificationId,
             number: el.number,
           });
         }
       }
     });
+    setNotificationMessagesErase(messageErageList);
     updaterenderList();
   };
 
@@ -91,22 +92,20 @@ const Chat = ({ showToast }) => {
   };
 
   const getClassnameforUserandNotification = (itemId) => {
-    let number = 0;
     let className = "";
     let check = false;
     if (currentPeerUser && currentPeerUser.id === itemId) {
       className = "viewWrapItemFocused";
     } else {
-      displayedContactSwitchedNotification.forEach((item) => {
+      currentUserMessages.forEach((item) => {
         if (item.notificationId.length > 0) {
           if (item.notificationId === itemId) {
             check = true;
-            number = item.number;
           }
         }
       });
       if (check === true) {
-        className = "viewWrapItemNofification";
+        className = "viewWrapItemNotification";
       } else {
         className = "viewWrapItem";
       }
@@ -127,7 +126,7 @@ const Chat = ({ showToast }) => {
               id={item.key}
               className={classname}
               onClick={() => {
-                //notificationErase(item.id);
+                notificationErase(item.id);
                 setCurrentPeerUser(item);
                 document.getElementById(item.key).style.backgroundColor =
                   "#fff";
@@ -141,11 +140,7 @@ const Chat = ({ showToast }) => {
                 <span className="textItem">{`Name: ${item.name}`}</span>
               </div>
               {classname === "viewWrapItemNotification" ? (
-                <div className="notificationpragraph">
-                  <p id={item.key} className="newmessages">
-                    New messages
-                  </p>
-                </div>
+                <div className="notificationpragraph">New message</div>
               ) : null}
             </button>
           );
@@ -171,7 +166,6 @@ const Chat = ({ showToast }) => {
     });
     renderListUser(newSearchUsers);
   };
-
   return (
     <div className="root">
       <div className="body">

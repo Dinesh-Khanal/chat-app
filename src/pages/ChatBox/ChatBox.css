@@ -137,7 +137,7 @@ input::placeholder {
 /* View item message */
 
 .viewItemRight {
-  width: 300px;
+  width: 30vw;
   height: auto;
 
   background-color: #dcf8c6;
@@ -158,7 +158,7 @@ input::placeholder {
 }
 
 .viewItemRight2 {
-  width: 300px;
+  width: 30vw;
   height: auto;
   background-color: #e1f3fb;
   align-self: flex-end;
@@ -174,7 +174,7 @@ input::placeholder {
 }
 
 .viewItemRight3 {
-  width: 300px;
+  width: 20vw;
   height: auto;
   align-self: flex-end;
   margin-right: 20px;
@@ -187,7 +187,7 @@ input::placeholder {
 }
 
 .viewWrapItemLeft {
-  width: 300px;
+  width: 30vw;
   text-align: left;
   align-self: flex-start;
   margin-left: 20px;
@@ -196,7 +196,7 @@ input::placeholder {
 }
 
 .viewWrapItemLeft2 {
-  width: 300px;
+  width: 30vw;
   align-self: flex-start;
   text-align: left;
   margin-left: 20px;
@@ -207,12 +207,12 @@ input::placeholder {
 .viewWrapItemLeft3 {
   flex-direction: row;
   display: flex;
-  width: 340px;
+  width: 34vw;
   margin-bottom: -15px;
 }
 
 .viewItemLeft {
-  width: 300px;
+  width: 30vw;
   height: auto;
   background-color: #ffffff;
   border-top-left-radius: 8px;
@@ -228,19 +228,19 @@ input::placeholder {
 }
 
 .viewItemLeft2 {
-  width: 300px;
+  width: 30vw;
   height: auto;
   background-color: #203152;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
-  border-bottom-left-radius: 0px;
+  border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
   color: white;
   box-shadow: 0 5px 5px #808888;
 }
 
 .viewItemLeft3 {
-  width: 300px;
+  width: 20vw;
   height: auto;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
@@ -252,14 +252,11 @@ input::placeholder {
   display: flex;
   align-items: center;
   text-align: center;
-  margin-left: 400px;
+  margin-left: 300px;
   font: italic small-caps bold 15px/30px Georgia, serif;
   width: 110px;
   background-color: #e1f3fb;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  padding-left: 5px;
-  padding-right: 5px;
+  padding: 5px;
   border-radius: 10px;
 }
 .timesetup {
@@ -295,8 +292,8 @@ input::placeholder {
 
 .imgItemRight {
   object-fit: cover;
-  width: 300px;
-  height: 300px;
+  width: 100%;
+  height: 100%;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   border-bottom-left-radius: 8px;
@@ -305,11 +302,11 @@ input::placeholder {
 
 .imgItemLeft {
   object-fit: cover;
-  width: 300px;
-  height: 300px;
+  width: 100%;
+  height: 100%;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
-  border-bottom-left-radius: 0px;
+  border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
 }
 
@@ -325,7 +322,7 @@ input::placeholder {
 .viewStickers {
   display: block;
   border-top: 1px solid #e8e8e8;
-  height: 100px;
+  height: 70px;
   align-items: center;
   justify-content: space-around;
   overflow-x: scroll;
@@ -345,8 +342,8 @@ input::placeholder {
 }
 
 .imgSticker {
-  width: 80px;
-  height: 80px;
+  width: 50px;
+  height: 50px;
   object-fit: contain;
 }
 
