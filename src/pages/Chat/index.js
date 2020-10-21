@@ -22,7 +22,6 @@ const Chat = ({ showToast }) => {
   const currentUserDocumentId = localStorage.getItem(
     loginStrings.FirebaseDocumentId
   );
-  const [contactList, setContactList] = useState([]);
   const currentUserMessages = [];
   let history = useHistory();
 
@@ -39,8 +38,8 @@ const Chat = ({ showToast }) => {
         });
         setDisplayedContactSwitchedNotification(currentUserMessages);
       });
-    getListUser(); // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentUserDocumentId, currentUserMessages]);
+
   const getListUser = async () => {
     const searchUsers = [];
     const result = await firestore.collection("users").get();
@@ -62,6 +61,8 @@ const Chat = ({ showToast }) => {
     renderListUser(searchUsers);
     setContactList(searchUsers);
   };
+  const [contactList, setContactList] = useState([]);
+  useEffect(getListUser, []);
 
   const onProfileClick = () => {
     history.push("/profile");
